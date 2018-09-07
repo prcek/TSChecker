@@ -6,6 +6,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 
 
 import FullScreenIcon from '@material-ui/icons/SettingsOverscan';
@@ -26,6 +27,7 @@ import CoursesDialog from './CoursesDialog';
 import SyncPanel from './SyncPanel';
 import Clock from './Clock';
 import HallInfo from './HallInfo';
+import CoursesChips from './CoursesChips';
 import Cfg from './utils/Cfg';
 
 
@@ -36,6 +38,7 @@ library.add(faMale, faFemale);
 
 
 
+const heightSub = 300;
 
 const styles = theme => ({
   button: {
@@ -73,6 +76,11 @@ class App extends React.Component {
   
     }
 
+    handleActiveCoursesList(courses,mhosts,fhosts) {
+      console.log("handleActiveCoursesList")
+      this.setState({activeCourses:courses,activeHostMCourses:mhosts,activeHostFCourses:fhosts})
+    }
+  
     onTestButton(e) {
       console.log("test setup button!");
       getCourse("agpzfnRzLXphcGlzchMLEgZDb3Vyc2UYgICA2PeDigoM",c=>{
@@ -195,6 +203,21 @@ class App extends React.Component {
       )
     }
 
+    renderEntranceCfg() {
+      const {classes} = this.props;
+      return (
+        <div className={classes.gridPaper} style={{overflow: 'scroll', height: this.state.winHeight-heightSub}}>
+          { this.state.activeCourses.length==0 && <Typography variant="headline" align="center"> Není zvolen kurz pro vstup </Typography>}
+          { this.state.activeCourses.length>0 && <Typography variant="headline" align="center"> Vstup pro kurz </Typography>}
+          <CoursesChips courses={this.state.activeCourses} />
+          { this.state.activeHostMCourses.length>0 && <Typography variant="headline" align="center"> Hostování kluci </Typography>}
+          <CoursesChips courses={this.state.activeHostMCourses} />
+          { this.state.activeHostFCourses.length>0 && <Typography variant="headline" align="center"> Hostování holky </Typography>}
+          <CoursesChips courses={this.state.activeHostFCourses} />
+        </div>
+      )
+    }
+
     render() {
       const {classes} = this.props;
       return (
@@ -214,10 +237,10 @@ class App extends React.Component {
               <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
 
               {this.renderCmdButtons()}
-          
+
               <Clock />
               <HallInfo students={this.state.activeStudents}/>
-             
+              {this.renderEntranceCfg()}
           </div>
       );
     }
