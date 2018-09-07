@@ -28,15 +28,14 @@ import SyncPanel from './SyncPanel';
 import Clock from './Clock';
 import HallInfo from './HallInfo';
 import CoursesChips from './CoursesChips';
+import Display from './Display';
 import Cfg from './utils/Cfg';
 
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faEnvelope, faKey, faMale, faFemale } from '@fortawesome/free-solid-svg-icons';
+import {  faMale, faFemale, faTimes, faThumbsUp, faSearch, faWrench, faExclamationTriangle, faBug } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faMale, faFemale);
-
-
+library.add(faMale, faFemale, faTimes, faThumbsUp, faSearch, faWrench, faExclamationTriangle, faBug);
 
 const heightSub = 300;
 
@@ -241,6 +240,7 @@ class App extends React.Component {
               <Clock />
               <HallInfo students={this.state.activeStudents}/>
               {this.renderEntranceCfg()}
+              <Display  scan_active={this.state.scanReady} flash={this.state.message_flash} message={this.state.message} message_desc={this.state.message_desc} message_type={this.state.message_type}/>
           </div>
       );
     }
