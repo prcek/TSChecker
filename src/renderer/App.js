@@ -19,9 +19,10 @@ import CloudIcon from '@material-ui/icons/CloudDownload';
 
 
 import {toggleFullScreen,appQuit,openDevTools} from './utils/ECom';
-import {startSync,stopSync,findRefGid,getCoursesTree,registerDBCallback,getSyncState,getCourse, getCourses, reportEnter, reportAssistant, reportRawScan, reportSetupCmd, reportInfoLog} from './utils/Db';
+import {startSync,findRefGid,getCoursesTree,registerDBCallback,getSyncState,getCourse, getCourses, reportEnter, reportAssistant, reportRawScan, reportSetupCmd, reportInfoLog} from './utils/Db';
 
 import CfgDialog from './CfgDialog';
+import CoursesDialog from './CoursesDialog';
 import SyncPanel from './SyncPanel';
 
 import Cfg from './utils/Cfg';
@@ -37,14 +38,23 @@ class App extends React.Component {
     constructor(props) {
       super(props);
       this.state = {  
-        activeSync: false,
-        cfgOpen:false,
-        syncOk:false,
-        apiReady:false,
-        lastSync: null,
+        message: "ready", 
+        message_desc: "verze 1.1", 
+        message_type: "init",
+        activeSync: false, 
+        scanReady: false,
+        syncOk:null, 
+        cfgOpen: false, 
+        coursesOpen: false, 
+        activeCourses:[], 
+        activeHostMCourses:[], 
+        activeHostFCourses:[], 
+        activeStudents:[],
+        activeAssistants:[],
+        coursesList:[],
         winHeight: 500,
         winWidth: 500,
-      };
+        };
       this.cfg = new Cfg();
       this.updateDimensions = this.updateDimensions.bind(this);
       this.hideTimeout = null;
@@ -53,6 +63,15 @@ class App extends React.Component {
   
     }
 
+    onTestButton(e) {
+      console.log("test setup button!");
+      getCourse("agpzfnRzLXphcGlzchMLEgZDb3Vyc2UYgICA2PeDigoM",c=>{
+        findRefGid(71581,(s)=>{
+          reportEnter("ok",s,c,"participant")
+        })
+      })
+    }
+  
     onDBChange(e) {
       //console.log("onDBChange",e)
       this.setState({activeSync:e.active,syncOk:e.ok,apiReady:e.apiReady,lastSync:this.cfg.last_sync});
@@ -103,7 +122,41 @@ class App extends React.Component {
       },3000)
     }
   
-
+    restartFlashTimeout() {
+      if (this.flashTimeout !== null) {
+        clearTimeout(this.flashTimeout);
+      }
+      this.flashTimeout = setTimeout(()=>{
+        this.flashTimeout = null;
+        this.setState({message_flash:false})
+      },200)
+    }
+  
+    logEntryTime(id) {
+      this.entryLog[id]= new Date();
+    }
+    getEntryTimeDelay(id) {
+      var time = (new Date()) - this.entryLog[id];
+      time = time /(1000);
+      if (time < 120) {
+        return Math.round(time) + " sec";
+      }
+      time = time /60;
+      return Math.round(time)+" min";
+    }
+  
+    showMsg(msg,desc,type) {
+      if ((msg == null) || (msg == undefined)) {
+        msg = "";
+      }
+      if ((desc == null) || (desc == undefined)) {
+        desc = "";
+      }
+      this.setState({message: msg, message_desc: desc, message_type:type,message_flash:true})
+      this.restartFlashTimeout();
+      this.restartHideTimeout();
+    }
+  
     renderCmdButtons() {
       const {classes} = this.props;
       return(
@@ -115,7 +168,7 @@ class App extends React.Component {
             <Button variant="raised" className={classes.button} color="primary" onClick={()=>this.setState({cfgOpen:true})}><CfgIcon/></Button>
           </Tooltip>
           <Tooltip title="Nastavení vstupu">
-            <Button variant="raised" className={classes.button} color="primary" onClick={(e)=>this.onCoursesButton(e)}><InputIcon/></Button>
+            <Button variant="raised" className={classes.button} color="primary" onClick={()=>{this.setState({coursesOpen:true})}}><InputIcon/></Button>
           </Tooltip>
           <Tooltip title="Vynulování počítadla">
             <Button variant="raised" className={classes.button} color="primary" onClick={(e)=>this.onResetButton(e)}><DeleteIcon/></Button>
@@ -137,6 +190,17 @@ class App extends React.Component {
       return (
           <div>
               <CfgDialog open={this.state.cfgOpen} onRequestClose={(e)=>this.setState({cfgOpen:false})}/>
+
+              <CoursesDialog 
+                open={this.state.coursesOpen} 
+                onRequestClose={(e)=>this.setState({coursesOpen:false})}
+                courses={this.state.coursesList}
+                activeCourses = {this.state.activeCourses}
+                activeHostMCourses = {this.state.activeHostMCourses}
+                activeHostFCourses = {this.state.activeHostFCourses}
+                onSave={(courses,mhosts,fhosts)=>this.handleActiveCoursesList(courses,mhosts,fhosts)}
+              />   
+
               <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
 
               {this.renderCmdButtons()}

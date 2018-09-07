@@ -88,7 +88,7 @@ class CfgDialog extends React.Component {
                     <IconButton  onClick={this.props.onRequestClose} aria-label="Close">
                         <CloseIcon />
                     </IconButton>
-                    <Typography type="title" color="inherit" className={classes.flex}>
+                    <Typography variant="title" color="inherit" className={classes.flex}>
                         Konfigurace
                     </Typography>
                     <Button  onClick={(e)=>{this.handleSaveAndClose(e)}}>
