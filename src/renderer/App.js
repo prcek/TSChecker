@@ -20,6 +20,8 @@ import CloudIcon from '@material-ui/icons/CloudDownload';
 
 import {toggleFullScreen,appQuit,openDevTools} from './utils/ECom';
 
+import CfgDialog from './CfgDialog';
+
 import Cfg from './utils/Cfg';
 
 const styles = theme => ({
@@ -34,6 +36,7 @@ class App extends React.Component {
       super(props);
       this.state = {  
         activeSync: false,
+        cfgOpen:false,
       };
       this.cfg = new Cfg();
     }
@@ -47,7 +50,7 @@ class App extends React.Component {
             <Button variant="raised" className={classes.button} color="primary" disabled={this.state.activeSync} onClick={(e)=>this.onSyncButton(e)}><CloudIcon/></Button>  
           </Tooltip>
           <Tooltip title="Konfigurace">
-            <Button variant="raised" className={classes.button} color="primary" onClick={(e)=>this.onCfgButton(e)}><CfgIcon/></Button>
+            <Button variant="raised" className={classes.button} color="primary" onClick={()=>this.setState({cfgOpen:true})}><CfgIcon/></Button>
           </Tooltip>
           <Tooltip title="Nastavení vstupu">
             <Button variant="raised" className={classes.button} color="primary" onClick={(e)=>this.onCoursesButton(e)}><InputIcon/></Button>
@@ -71,6 +74,8 @@ class App extends React.Component {
       const {classes} = this.props;
       return (
           <div>
+              <CfgDialog open={this.state.cfgOpen} onRequestClose={(e)=>this.setState({cfgOpen:false})}/>
+
               {this.renderCmdButtons()}
           </div>
       );
