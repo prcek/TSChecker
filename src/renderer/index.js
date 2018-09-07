@@ -1,5 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
+
+
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+import CssBaseline from '@material-ui/core/CssBaseline';
 import App from './App';
 
 import { PersistGate } from 'redux-persist/integration/react'
@@ -39,12 +43,26 @@ window.addEventListener('offline',  alertOnlineStatus)
 
 alertOnlineStatus();
 
+const muitheme = createMuiTheme({
+  palette: {
+    type: 'dark', // Switching the dark mode on is a single property value change.
+  },
+  typography: {
+    display3: {
+      color: 'rgba(255, 255, 255, 1)'
+    }
+  }
+});
 
+document.body.style.background = "black";
 
 render( 
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <CssBaseline/>
+        <MuiThemeProvider theme={muitheme}>
+          <App />
+        </MuiThemeProvider> 
       </PersistGate>
     </Provider>,
 document.getElementById('app') );

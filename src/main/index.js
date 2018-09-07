@@ -16,8 +16,12 @@ function createMainWindow() {
   const window = new BrowserWindow({
     webPreferences: {webSecurity: false},
     title: "TSChecker 1.0.0",
-    width:650,
-    height:500,
+    width: 1024, 
+    height: 768, 
+    show: false, 
+    fullscreenable:true, 
+    autoHideMenuBar: true, 
+    backgroundColor:'#000000'
   });
 
   if (isDevelopment) {
@@ -46,6 +50,11 @@ function createMainWindow() {
     })
   })
 
+  
+  window.once('ready-to-show', () => {
+    window.show();
+  });
+  
   return window
 }
 
@@ -74,6 +83,39 @@ app.on('ready', () => {
 
   }
 })
+
+
+promiseIpc.on('rr',(opts)=>{
+  console.log("on ipc rr",opts);
+  switch(opts.action) {
+    case "quit": 
+      app.quit(); 
+    break;
+    case "togglefs": 
+        if (mainWindow) {
+            mainWindow.setFullScreen(!mainWindow.isFullScreen());
+        }
+    break;
+    case "setfs":
+      if (mainWindow) {
+        mainWindow.setFullScreen(true);
+      }
+    break;
+    case "clearfs":
+      if (mainWindow) {
+        mainWindow.setFullScreen(false);
+      }
+    break;
+    case "devtools": 
+        if (mainWindow) {
+            mainWindow.webContents.openDevTools()
+        }
+    break;
+    default:
+      return {res:"not implemented",opts};  
+  }
+  return {res:"ok"};
+});
 
 
 /*  TODO: use promiseIpc.on
