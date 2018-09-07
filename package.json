@@ -2,9 +2,11 @@
   "name": "tschecker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node -v && electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "yarn compile && electron-builder --publish never"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,7 @@
   },
   "homepage": "https://github.com/prcek/TSChecker#readme",
   "devDependencies": {
+    "@babel/preset-react": "^7.0.0",
     "electron": "^2.0.8",
     "electron-builder": "^20.28.4",
     "electron-webpack": "^2.3.1",
