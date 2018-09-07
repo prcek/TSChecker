@@ -24,7 +24,7 @@ import {startSync,findRefGid,getCoursesTree,registerDBCallback,getSyncState,getC
 import CfgDialog from './CfgDialog';
 import CoursesDialog from './CoursesDialog';
 import SyncPanel from './SyncPanel';
-
+import Clock from './Clock';
 import Cfg from './utils/Cfg';
 
 const styles = theme => ({
@@ -204,6 +204,10 @@ class App extends React.Component {
               <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
 
               {this.renderCmdButtons()}
+          
+              <Clock />
+             
+             
           </div>
       );
     }
