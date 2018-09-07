@@ -25,7 +25,17 @@ import CfgDialog from './CfgDialog';
 import CoursesDialog from './CoursesDialog';
 import SyncPanel from './SyncPanel';
 import Clock from './Clock';
+import HallInfo from './HallInfo';
 import Cfg from './utils/Cfg';
+
+
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faEnvelope, faKey, faMale, faFemale } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faMale, faFemale);
+
+
+
 
 const styles = theme => ({
   button: {
@@ -206,7 +216,7 @@ class App extends React.Component {
               {this.renderCmdButtons()}
           
               <Clock />
-             
+              <HallInfo students={this.state.activeStudents}/>
              
           </div>
       );
