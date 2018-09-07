@@ -37,7 +37,7 @@ class SyncPanel extends Component {
                     <Led color={this.props.syncOk?"green":"red"} blinking={this.props.activeSync} />
                 </Grid>
                 <Grid item className={classes.label}>
-                    <Typography variant="title">{"Databaze"}</Typography>
+                    <Typography variant="title">{"Databáze"}</Typography>
                 </Grid>
                 <Grid item>
                     <Typography variant="title">verze dat: {moment(this.props.lastSync).format('LLLL')}</Typography>
