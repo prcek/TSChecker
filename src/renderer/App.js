@@ -19,6 +19,7 @@ import CloudIcon from '@material-ui/icons/CloudDownload';
 
 
 import {toggleFullScreen,appQuit,openDevTools} from './utils/ECom';
+import {startSync,stopSync,findRefGid,getCoursesTree,registerDBCallback,getSyncState,getCourse, getCourses, reportEnter, reportAssistant, reportRawScan, reportSetupCmd, reportInfoLog} from './utils/Db';
 
 import CfgDialog from './CfgDialog';
 import SyncPanel from './SyncPanel';
@@ -41,17 +42,74 @@ class App extends React.Component {
         syncOk:false,
         apiReady:false,
         lastSync: null,
+        winHeight: 500,
+        winWidth: 500,
       };
       this.cfg = new Cfg();
+      this.updateDimensions = this.updateDimensions.bind(this);
+      this.hideTimeout = null;
+      this.flashTimeout = null;
+      this.entryLog = [];
+  
     }
 
+    onDBChange(e) {
+      //console.log("onDBChange",e)
+      this.setState({activeSync:e.active,syncOk:e.ok,apiReady:e.apiReady,lastSync:this.cfg.last_sync});
+    } 
   
+    updateDimensions() {
+      this.setState({ winWidth: window.innerWidth, winHeight: window.innerHeight });
+    }
+  
+    componentDidMount() {
+      reportInfoLog("info","startup");
+      this.updateDimensions();
+      window.addEventListener("resize", this.updateDimensions);
+  
+      registerDBCallback((e)=>{this.onDBChange(e)});
+      this.setState({activeSync:getSyncState().active, syncOk:getSyncState().ok});
+      getCoursesTree((list)=>{
+        console.log("list ready",list)
+        this.setState({coursesList:list})
+      })
+      if (this.cfg.full_screen) {
+        console.log("set fullscreen")
+        setFullScreen();
+      } else {
+        console.log("clear fullscreen")
+      }
+  
+      if (this.cfg.startup_sync) {
+        console.log("auto startup sync")
+        startSync();
+      } else {
+        this.setState({lastSync:this.cfg.last_sync})
+      }
+      this.restartHideTimeout();
+    }
+    componentWillUnmount() {
+      window.removeEventListener("resize", this.updateDimensions);
+      registerDBCallback(null);
+    }
+  
+    restartHideTimeout() {
+      if (this.hideTimeout !== null) {
+        clearTimeout(this.hideTimeout);
+      }
+      this.hideTimeout = setTimeout(()=>{
+        this.hideTimeout = null;
+        this.setState({message:"", message_desc:"",message_type:"idle"})
+      },3000)
+    }
+  
+
     renderCmdButtons() {
       const {classes} = this.props;
       return(
         <React.Fragment>
           <Tooltip title="Aktualizace DB">
-            <Button variant="raised" className={classes.button} color="primary" disabled={this.state.activeSync} onClick={(e)=>this.onSyncButton(e)}><CloudIcon/></Button>  
+            <Button variant="raised" className={classes.button} color="primary" disabled={this.state.activeSync} onClick={()=>{startSync()}}><CloudIcon/></Button>  
           </Tooltip>
           <Tooltip title="Konfigurace">
             <Button variant="raised" className={classes.button} color="primary" onClick={()=>this.setState({cfgOpen:true})}><CfgIcon/></Button>
