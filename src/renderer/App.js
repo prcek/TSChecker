@@ -21,6 +21,7 @@ import CloudIcon from '@material-ui/icons/CloudDownload';
 import {toggleFullScreen,appQuit,openDevTools} from './utils/ECom';
 
 import CfgDialog from './CfgDialog';
+import SyncPanel from './SyncPanel';
 
 import Cfg from './utils/Cfg';
 
@@ -37,6 +38,9 @@ class App extends React.Component {
       this.state = {  
         activeSync: false,
         cfgOpen:false,
+        syncOk:false,
+        apiReady:false,
+        lastSync: null,
       };
       this.cfg = new Cfg();
     }
@@ -75,6 +79,7 @@ class App extends React.Component {
       return (
           <div>
               <CfgDialog open={this.state.cfgOpen} onRequestClose={(e)=>this.setState({cfgOpen:false})}/>
+              <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
 
               {this.renderCmdButtons()}
           </div>
