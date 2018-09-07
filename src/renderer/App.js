@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
+import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -41,9 +42,32 @@ library.add(faMale, faFemale, faTimes, faThumbsUp, faSearch, faWrench, faExclama
 const heightSub = 300;
 
 const styles = theme => ({
+  full: {
+    //height: '95vh'  
+  },
+  gridContainer: {
+  },
+  gridItem: {
+  },
+  gridContainerD: {
+    border: '1px solid red',
+  },
+  gridItemD: {
+    border: '1px solid blue',
+  },
+  gridPaper: {
+    //overflow: 'scroll'
+  },
+  gridSeparator: {
+    background: 'white',
+    height: '2px',
+    margin: '0px',
+    paggind: '0px'
+  },
   button: {
     margin: theme.spacing.unit,
   },
+
 });
 
 
@@ -220,10 +244,20 @@ class App extends React.Component {
 
     render() {
       const {classes} = this.props;
+      const gridContainerClass = this.cfg.debug ? classes.gridContainerD: classes.gridContainer;
+      const gridItemClass = this.cfg.debug ? classes.gridItemD: classes.gridItem;
+  
       return (
-          <div>
-              <CfgDialog open={this.state.cfgOpen} onRequestClose={(e)=>this.setState({cfgOpen:false})}/>
 
+        <Grid container className={gridContainerClass}>
+          <Grid item xs={4}>
+            <div className={classes.gridPaper}>
+              <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
+            </div>
+          </Grid>
+          <Grid item xs={8}>
+            <div>
+              <CfgDialog open={this.state.cfgOpen} onRequestClose={(e)=>this.setState({cfgOpen:false})}/>
               <CoursesDialog 
                 open={this.state.coursesOpen} 
                 onRequestClose={(e)=>this.setState({coursesOpen:false})}
@@ -233,13 +267,36 @@ class App extends React.Component {
                 activeHostFCourses = {this.state.activeHostFCourses}
                 onSave={(courses,mhosts,fhosts)=>this.handleActiveCoursesList(courses,mhosts,fhosts)}
               />   
+              <Grid container className={gridContainerClass} justify={"space-around"} >
+                 {this.renderCmdButtons()}
+              </Grid>
+            </div>
+          </Grid>
 
-              <SyncPanel activeSync={this.state.activeSync} syncOk={this.state.syncOk} apiReady={this.state.apiReady} lastSync={this.state.lastSync}/>
 
-              {this.renderCmdButtons()}
+          <Grid item xs={12}>
+            <div className={classes.gridSeparator}/>
+          </Grid>
+          <Grid item xs={4}>
+                <Clock />
+          </Grid>
+          <Grid item xs={8}>
+                <HallInfo students={this.state.activeStudents}/>
+          </Grid>
 
-              <Clock />
-              <HallInfo students={this.state.activeStudents}/>
+          <Grid item xs={12}>
+            <div className={classes.gridSeparator}/>
+          </Grid>
+
+          <Grid item xs={4}>
+          {this.renderEntranceCfg()}
+          </Grid>
+
+          <Grid item className={gridItemClass} xs={8} style={{height: this.state.winHeight-heightSub, paddingRight: "20px"}}>
+              <Display  scan_active = {this.state.scanReady} flash={this.state.message_flash} message={this.state.message} message_desc = {this.state.message_desc} message_type = {this.state.message_type}/>
+          </Grid>
+          <Grid item xs={12}>
+            <div className={classes.gridPaper}>
               <ScanLine 
                 debug={this.cfg.debug}
                 active={!(this.state.cfgOpen || this.state.coursesOpen)}
@@ -250,24 +307,24 @@ class App extends React.Component {
                 onScanManual = {(val)=>this.onScanManual(val)}
                 onScanReady = {(val)=>this.onScanReady(val)}
               />
-
-              {this.renderEntranceCfg()}
-              <Display scan_active={this.state.scanReady} flash={this.state.message_flash} message={this.state.message} message_desc={this.state.message_desc} message_type={this.state.message_type}/>
-          </div>
+            </div>
+          </Grid>
+        </Grid>
+        
       );
     }
   }
 
-  App.propTypes = {
-    classes: PropTypes.object.isRequired,
-    online: PropTypes.bool,
-  };
+App.propTypes = {
+  classes: PropTypes.object.isRequired,
+  online: PropTypes.bool,
+};
 
-  function mapStateToProps(state) {
-    return { 
-        online: state.status.online,
-    }
+function mapStateToProps(state) {
+  return { 
+      online: state.status.online,
   }
+}
 
 const mapDispatchToProps = dispatch => {
   return {
