@@ -29,6 +29,7 @@ import Clock from './Clock';
 import HallInfo from './HallInfo';
 import CoursesChips from './CoursesChips';
 import Display from './Display';
+import ScanLine from './ScanLine';
 import Cfg from './utils/Cfg';
 
 
@@ -239,8 +240,19 @@ class App extends React.Component {
 
               <Clock />
               <HallInfo students={this.state.activeStudents}/>
+              <ScanLine 
+                debug={this.cfg.debug}
+                active={!(this.state.cfgOpen || this.state.coursesOpen)}
+                onScanStudent = {(card,st,cs,rd)=>this.onScanStudent(card,st,cs,rd)}
+                onScanAssistant = {(card,ass,rd)=>this.onScanAssistant(card,ass,rd)}
+                onScanCmd = {(cmd,c,rd)=>this.onScanCmd(cmd,c,rd)}
+                onScanError = {(msg,rd)=>this.onScanError(msg,rd)}
+                onScanManual = {(val)=>this.onScanManual(val)}
+                onScanReady = {(val)=>this.onScanReady(val)}
+              />
+
               {this.renderEntranceCfg()}
-              <Display  scan_active={this.state.scanReady} flash={this.state.message_flash} message={this.state.message} message_desc={this.state.message_desc} message_type={this.state.message_type}/>
+              <Display scan_active={this.state.scanReady} flash={this.state.message_flash} message={this.state.message} message_desc={this.state.message_desc} message_type={this.state.message_type}/>
           </div>
       );
     }
