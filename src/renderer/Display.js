@@ -45,7 +45,7 @@ class Display extends Component {
             case "manual": icon_name = "search"; icon_color="blue"; break;
         }
         return (
-            <Grid container align={'center'} justify={'center'} style={{height: "100%", backgroundColor: bcolor}}>
+            <Grid container alignItems={'center'} justify={'center'} style={{height: "100%", backgroundColor: bcolor}}>
                 <Grid item>
                     <Typography variant="display4" align="center"> 
                         <FontAwesomeIcon icon={icon_name} color={icon_color}/>

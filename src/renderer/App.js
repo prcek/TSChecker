@@ -199,6 +199,162 @@ class App extends React.Component {
       this.restartHideTimeout();
     }
   
+    onScanReady(ready) {
+      this.setState({scanReady:ready});
+    }
+  
+    onScanManual(val) {
+      this.setState({message: val, message_desc:"ruční zadání čísla karty", message_type:"manual",message_flash:false})
+      this.restartHideTimeout();
+    }
+  
+    onScanAssistant(card,assistant,raw_data) {
+      console.log("onScanAssistant",card,assistant);
+      if (assistant === null) {
+        this.showMsg("","neznámý assisten","error");
+        reportInfoLog("error","missing assistant");
+        return;
+      } 
+      if (this.isInActiveList(this.state.activeAssistants,assistant)) {
+        const newAl = this.removeFromActiveList(this.state.activeAssistants,assistant);
+        this.setState({activeAssistants:newAl});
+        this.showMsg(assistant.name,"odchod","out");
+        reportAssistant("ok",assistant,"out");
+      } else {
+        this.setState({activeAssistants:[...this.state.activeAssistants,assistant]});
+        this.showMsg(assistant.name,"příchod","in");
+        reportAssistant("ok",assistant,"in");
+      }
+    }
+  
+    onScanStudent(card,student,course,raw_data) {
+      console.log("onScanStudent",card,student,course);
+      if (student === null) {
+        this.showMsg("","neznámý žák","error");
+        reportInfoLog("error","missing student");
+        return;
+      } 
+      if (course === null) {
+        this.showMsg(student.name,"žák z neznámého kurzu","error");
+        reportInfoLog("error","missing course");
+        return;
+      }    
+  
+      if (this.isInActiveList(this.state.activeStudents,student)) {
+        const d = this.getEntryTimeDelay(student._id);
+        this.showMsg(student.name,"opakovaný vstup ("+d+")","error");
+        reportEnter("duplicate",student,course,"");
+        return;
+      }
+  
+  
+      if (this.isInActiveList(this.state.activeCourses,course)) {
+        this.setState({activeStudents:[...this.state.activeStudents,student]});
+        this.logEntryTime(student._id);
+        if (student.sex === "m") {
+          this.showMsg(student.name,"vstup povolen","ok-male");
+        } else if (student.sex === "f") {
+          this.showMsg(student.name,"vstup povolen","ok-female"); 
+        } else {
+          this.showMsg(student.name,"vstup povolen","ok");
+        }
+        reportEnter("ok",student,course,"participant");
+        return;
+      }
+  
+      if ((student.sex === "m") && (this.isInActiveList(this.state.activeHostMCourses,course))) {
+        this.setState({activeStudents:[...this.state.activeStudents,student]});
+        this.logEntryTime(student._id);      
+        this.showMsg(student.name,"hostování povoleno","ok-male");
+        reportEnter("ok",student,course,"guest");
+        return;
+      }
+  
+      if ((student.sex === "f") && (this.isInActiveList(this.state.activeHostFCourses,course))) {
+        this.setState({activeStudents:[...this.state.activeStudents,student]});
+        this.logEntryTime(student._id);      
+        this.showMsg(student.name,"hostování povoleno","ok-female");
+        reportEnter("ok",student,course,"guest");
+        return;
+      }
+  
+      this.showMsg(student.name,"vstup zamítnut","error");
+      reportEnter("denied",student,course,"");
+  
+  
+    }
+  
+    isInActiveList(list,course) {
+      const fc = list.find((c)=>{
+        return (c._id === course._id);
+      })
+      return fc !== undefined;
+    }
+  
+    removeFromActiveList(list,item) {
+      return list.filter(i=>i._id != item._id);
+    }
+  
+    onScanCmd(cmd,course,raw_data) {
+      console.log("onScanCmd",cmd,course);
+      if (course === null) {
+        this.showMsg("neznámý kurz","","error");
+        return;
+      } 
+      console.log(cmd.id);
+      switch(cmd.id) {
+        case "C_SETUP":
+          this.setState({activeCourses:[course], activeStudents:[]});
+          this.showMsg("nastaven kurz",course.code,"setup");
+          reportSetupCmd(cmd.id,course);
+        break;
+        case "C_SETUP_GM":
+          getCourses(course.season_key, course.folder_key, (list)=>{
+            console.log("MHost list:",list);
+            this.setState({activeCourses:[course], activeHostMCourses:list, activeStudents:[]});
+            this.showMsg("nastaven kurz + hostování",course.code,"setup");
+            reportSetupCmd(cmd.id,course);
+          });
+        break;
+        case "C_ADD":
+          if (this.isInActiveList(this.state.activeCourses,course)) {
+            this.showMsg("kurz je již vybrán",course.code,"error"); 
+          } else {
+            this.setState({activeCourses:[...this.state.activeCourses,course]});
+            this.showMsg("přidán kurz",course.code,"setup");
+            reportSetupCmd(cmd.id,course);
+          }
+        break;
+        case "C_ADD_M":
+          if (this.isInActiveList(this.state.activeHostMCourses,course)) {
+            this.showMsg("kurz je již vybrán",course.code,"error"); 
+          } else {
+            this.setState({activeHostMCourses:[...this.state.activeHostMCourses,course]});
+            this.showMsg("přidán kurz (hostování)",course.code,"setup");
+            reportSetupCmd(cmd.id,course);
+          }
+        break;
+        case "C_ADD_F":
+          if (this.isInActiveList(this.state.activeHostFCourses,course)) {
+            this.showMsg("kurz je již vybrán",course.code,"error"); 
+          } else {
+            this.setState({activeHostFCourses:[...this.state.activeHostFCourses,course]});
+            this.showMsg("přidán kurz (hostování)",course.code,"setup");
+            reportSetupCmd(cmd.id,course);
+          }
+        break;
+        default:
+          this.showMsg("neznámá ovládací karta","","error"); 
+          reportInfoLog("error","unexpected cmd card");
+      }
+    }
+    onScanError(msg,raw_data) {
+      console.log("onScanError",msg);
+      this.showMsg(msg,"","error");
+    }
+  
+  
+  
     renderCmdButtons() {
       const {classes} = this.props;
       return(
