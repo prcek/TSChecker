@@ -88,9 +88,10 @@ class ScanLine extends Component {
             console.log("DIRECT INPUT num");
             dc = { action: "TS", id: Number(data)};
             reportRawScan("manual",data);
-        } if (data.match(/^#[A-Z0-9-]+$/)) {
+        } if (data.match(/^#[a-zA-Z0-9-]+$/)) {
             console.log("DIRECT INPUT code");
-            dc = { action: "TS_S", id: data.substring(1)};
+            dc = { action: "TS_S", id: data.substring(1).toUpperCase()};
+            console.log("DIRECT INPUT code",dc);
             reportRawScan("manual",data);
         } else {
             dc = decode_card(data);
