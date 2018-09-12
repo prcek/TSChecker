@@ -13,7 +13,13 @@ function bin2json(data) {
 }
 
 function decode_card(s) {
-    if (s.match(/^TS\*/)) {
+    if (s.match(/^\*TS_S\*/)) {
+        const els = s.split("\*");
+        if (els.length !=4) {
+            return null;
+        }
+        return {'action':els[1],id:els[2]}
+    } else if (s.match(/^TS\*/)) {
         const els = s.split("\*");
         if (els.length != 7) {
             return null;

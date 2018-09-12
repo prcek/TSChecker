@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import decode_card from './utils/Decode';
-import {findRefGid,findAssistant,getCourse, reportRawScan} from './utils/Db';
+import {findRefGid,findCardId,findAssistant,getCourse, reportRawScan} from './utils/Db';
 
 
 
@@ -18,6 +18,9 @@ const fakeCard7 = "TS_CMD*eJyrVipLLVKyUgoJNlTSUcpMATKd4x1dXOLdgNzk/NKi4tR4sGhiek
 const fakeCard8 = "TS*71581*eJyrVipLLVKyUgoJNlTSUcpMUbIyNzS1MNRRKk5NLM7PA8oYGRia6xtaAGWT80uLilOBQiCleYm5IGZIfm5MqYFBqiGQNDQDSRSXFkHlnEqzyxJzUkBiqRVAfq5SLQCgwh9i*511121617*89993390**";
 const fakeCard9 = "TS*72210*eJyrVipLLVKyUgoJNlTSUcpMUbIyNzIyNNBRKk5NLM7PA8oYGRia6xtaAGWT80uLilOBQiCleYm5IKZXaU5mKpBbXFoEFQmLKTUwSE0pyc4vA7NAiotTK4AyaUq1ALKwH8w=*1471044403*2247658100**";
 const fakeCardA = "TS_A*eJyrVipLLVKyUgoJNlTSUcpMUbKyNDQyNtZRykvMTQWKJ+UnZWYDZYpLi6AiefllidlKtQDOrRD3*1451255502**";
+
+const newFakeCard1 = "*TS_S*C1VI-AWM7-2YXU*"
+
 
 class ScanLine extends Component {
     constructor(props) {
@@ -49,7 +52,7 @@ class ScanLine extends Component {
 
     handleValue(val) {
         this.setState({ value: val })
-        if (val.match(/^[0-9]+/)) {
+        if (val.match(/^[0-9]+/) || val.match(/^#/)) {
             this.props.onScanManual(val);
         }
     }
@@ -82,8 +85,12 @@ class ScanLine extends Component {
         console.log("processing input data",data)
         let dc = null;
         if (data.match(/^[0-9]+$/)) {
-            console.log("DIRECT INPUT");
+            console.log("DIRECT INPUT num");
             dc = { action: "TS", id: Number(data)};
+            reportRawScan("manual",data);
+        } if (data.match(/^#[A-Z0-9-]+$/)) {
+            console.log("DIRECT INPUT code");
+            dc = { action: "TS_S", id: data.substring(1)};
             reportRawScan("manual",data);
         } else {
             dc = decode_card(data);
@@ -91,6 +98,7 @@ class ScanLine extends Component {
                 reportRawScan("decode_ok",data);  
             }
         }
+
 
         if (dc === null) {
             this.props.onScanError("nelze přečíst kartu",data)
@@ -108,6 +116,17 @@ class ScanLine extends Component {
                         }
                     });
                 break;
+                case 'TS_S': 
+                    findCardId(dc.id, (st)=>{
+                        if (st === null) {
+                            this.props.onScanStudent(dc,null,null,data);
+                        } else {
+                            getCourse(st.course_key,(course)=>{
+                                this.props.onScanStudent(dc,st,course,data);
+                            })       
+                        }
+                    });
+                break;    
                 case 'TS_CMD':
                     getCourse(dc.course_id, (c)=>{
                         this.props.onScanCmd(dc,c,data)
@@ -132,7 +151,7 @@ class ScanLine extends Component {
                 <Typography>
                     active: {this.props.active?"yes":"no"} typing: {this.state.typing? "yes":"no"} focus: {this.state.focused? "yes":"no"}
                 </Typography>
-                <Button onClick={(e)=>this.onFakeCard(e,fakeCard8)}>TSCard_st</Button>
+                <Button onClick={(e)=>this.onFakeCard(e,newFakeCard1)}>TSCard_st</Button>
                 <Button onClick={(e)=>this.onFakeCard(e,fakeCard7)}>TSCard_cmd</Button>
                 <Button onClick={(e)=>this.onFakeCard(e,fakeCardA)}>TSCard_ass</Button>
             </div>

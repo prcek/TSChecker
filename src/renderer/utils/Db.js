@@ -263,6 +263,19 @@ function findRefGid(ref_gid,callback) {
     });
 }
 
+function findCardId(card_id,callback) {
+    console.log("db looking for card_id",card_id);
+    students_db.findOne({ card_id: card_id },function (err, doc) {
+        if (err) {
+            console.log("find err",err);
+            callback(null);
+        } else {
+            console.log("find res", doc !== null);
+            callback(doc);    
+        }
+    });
+}
+
 function findAssistant(ref_gid,callback) {
     console.log("db looking for assistant ref_gid",ref_gid);
     assistants_db.findOne({ ref_gid: ref_gid },function (err, doc) {
@@ -459,20 +472,21 @@ function reportInfoLog(status,data) {
 }
 
 
-module.exports = {
-    startSync:startSync,
-    stopSync:stopSync,
-    registerDBCallback: registerDBCallback,
-    getSyncState: getSyncState,
-    findRefGid: findRefGid,
-    findAssistant: findAssistant,
-    getCoursesTree: getCoursesTree,
-    getCourse: getCourse,
-    getCourses: getCourses,
-    reportEnter: reportEnter,
-    reportAssistant: reportAssistant,
-    reportRawScan: reportRawScan,
-    reportSetupCmd: reportSetupCmd,
-    reportInfoLog: reportInfoLog
+export  {
+    startSync,
+    stopSync,
+    registerDBCallback,
+    getSyncState,
+    findRefGid,
+    findCardId,
+    findAssistant,
+    getCoursesTree,
+    getCourse,
+    getCourses,
+    reportEnter,
+    reportAssistant,
+    reportRawScan,
+    reportSetupCmd,
+    reportInfoLog
 }
   

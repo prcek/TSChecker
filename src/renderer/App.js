@@ -353,6 +353,10 @@ class App extends React.Component {
       this.showMsg(msg,"","error");
     }
   
+    onResetButton(e) {
+      console.log("reset button!");
+      this.setState({activeStudents:[]})
+    }
   
   
     renderCmdButtons() {
