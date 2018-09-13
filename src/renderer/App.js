@@ -20,7 +20,7 @@ import TestIcon from '@material-ui/icons/TouchApp';
 import CloudIcon from '@material-ui/icons/CloudDownload';
 
 
-import {toggleFullScreen,appQuit,openDevTools} from './utils/ECom';
+import {toggleFullScreen,appQuit,openDevTools,setFullScreen} from './utils/ECom';
 import {startSync,findRefGid,getCoursesTree,registerDBCallback,getSyncState,getCourse, getCourses, reportEnter, reportAssistant, reportRawScan, reportSetupCmd, reportInfoLog} from './utils/Db';
 
 import CfgDialog from './CfgDialog';
