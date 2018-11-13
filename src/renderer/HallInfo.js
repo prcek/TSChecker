@@ -13,7 +13,7 @@ class HallInfo extends React.Component {
             switch (value.sex) {
                 case "m": return [sum[0]+1,sum[1],sum[2]+1];
                 case "f": return [sum[0],sum[1]+1,sum[2]+1];
-                default: [sum[0],sum[1],sum[2]+1];
+                default: return [sum[0],sum[1],sum[2]+1];
             }
         },[0,0,0]);
         return (
